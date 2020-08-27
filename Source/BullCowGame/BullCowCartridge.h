@@ -19,6 +19,7 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	private:
 	int32 Lives;
 	bool bGameOver;
+	TArray<FString> Words;
 	FString HiddenWord;
 
 	void AskForGuess() const;

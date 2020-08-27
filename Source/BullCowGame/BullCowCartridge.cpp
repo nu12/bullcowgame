@@ -1,10 +1,17 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "BullCowCartridge.h"
-//#include "Engine/Engine.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 void UBullCowCartridge::BeginPlay() // When the game starts
 {
     Super::BeginPlay();
+    /* IMPORTANT: In order for this to work in a packaged game 
+    you would need to add the WordLists directory to the list 
+    of Additional Non-Asset Directories to package in your 
+    Project Settings under Packaging.*/
+    const FString WordListPath = FPaths::ProjectContentDir() / TEXT("WordList/HiddenWordList.txt");
+    FFileHelper::LoadFileToStringArray(Words, *WordListPath);
     GenerateNewGame();
 }
 
@@ -39,7 +46,8 @@ void UBullCowCartridge::AskForGuess() const{
 
 void UBullCowCartridge::GenerateNewGame(){
     bGameOver = false;
-    HiddenWord = TEXT("above");
+    //HiddenWord = TEXT("above");
+    HiddenWord = Words[0];
     Lives = HiddenWord.Len();
     PrintLine(TEXT("Welcome to Bull Cow Game!"));
     AskForGuess();
