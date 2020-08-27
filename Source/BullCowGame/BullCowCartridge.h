@@ -18,10 +18,13 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	// Your declarations go below!
 	private:
 	int32 Lives;
+	bool bGameOver;
 	FString HiddenWord;
 
-	void AskForGuess();
+	void AskForGuess() const;
 	void GenerateNewGame();
-	void PromptToPlayAgain();
+	void EndGameWithMessage(const FString& Message);
 	void PrintBullsAndCows(const FString& Input);
+	bool PlayerHasLivesLeft();
+	bool IsIsogram(const FString& Input) const;
 };

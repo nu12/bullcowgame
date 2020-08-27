@@ -11,46 +11,45 @@ void UBullCowCartridge::BeginPlay() // When the game starts
 void UBullCowCartridge::OnInput(const FString& Input) // When the player hits enter
 {
     ClearScreen();
-    if(Lives == 0 && !Input.Equals("yes")){ 
-        FGenericPlatformMisc::RequestExit(false);
-    }else if(Lives == 0 && Input.Equals("yes")) {
+    if(bGameOver) {
         GenerateNewGame();
     }else if(Input.Equals("")){ 
         PrintLine(TEXT("Can't evaluate empty string."));
         AskForGuess();
-    }
-    else if(Input.Equals(HiddenWord)){
-        PrintLine(TEXT("CONGRATULATIONS!! You got it!"));
-        Lives = 0;
-        PromptToPlayAgain();
+    }else if(!IsIsogram(Input)){
+        PrintLine(TEXT("The guess needs to be an isogram."));
+        AskForGuess();
+    }else if(Input.Equals(HiddenWord)){
+        EndGameWithMessage("CONGRATULATIONS!! You've got it!");
     }else{
-        Lives--;
-        if(Lives == 0){
-            PrintLine(TEXT("You have lost!"));
-            PrintLine(TEXT("The word is: %s"), *HiddenWord);
-            PromptToPlayAgain();
-        }else{
+        if(PlayerHasLivesLeft()){
             PrintBullsAndCows(Input);
             AskForGuess();
+        }else{
+            EndGameWithMessage("You've lost!");
         }
     }
 }
 
-void UBullCowCartridge::AskForGuess(){
-    PrintLine(TEXT("Can you guess the %d letter word?"), HiddenWord.Len());
+void UBullCowCartridge::AskForGuess() const{
+    PrintLine(TEXT("Can you guess the %d letters word?"), HiddenWord.Len());
     PrintLine(TEXT("You have %d tries left."), Lives);
     PrintLine(TEXT("Enter your guess..."));
 }
 
 void UBullCowCartridge::GenerateNewGame(){
-    PrintLine(TEXT("Welcome to Bull Cow Game!"));
+    bGameOver = false;
     HiddenWord = TEXT("above");
     Lives = HiddenWord.Len();
+    PrintLine(TEXT("Welcome to Bull Cow Game!"));
     AskForGuess();
 }
 
-void UBullCowCartridge::PromptToPlayAgain(){
-    PrintLine(TEXT("Write \"yes\" to play again."));
+void UBullCowCartridge::EndGameWithMessage(const FString& Message){
+    bGameOver = true;
+    PrintLine(TEXT("%s"), *Message);
+    PrintLine(TEXT("The word is: %s"), *HiddenWord);
+    PrintLine(TEXT("Press Enter to play again."));
 }
 
 void UBullCowCartridge::PrintBullsAndCows(const FString& Input){
@@ -73,4 +72,16 @@ void UBullCowCartridge::PrintBullsAndCows(const FString& Input){
     PrintLine(TEXT("Bulls: %d | Cows: %d."), Bulls, Cows);
     PrintLine(TEXT("A Bull is the right letter in the right position."));
     PrintLine(TEXT("A Cow is the right letter in the wrong position."));
+}
+
+bool UBullCowCartridge::PlayerHasLivesLeft(){
+    if (--Lives > 0) return true;
+    return false;
+}
+
+bool UBullCowCartridge::IsIsogram(const FString& Input) const{
+    for(int32 Index = 0; Index < Input.Len(); Index++)
+        for(int32 Comparison = Index + 1; Comparison < Input.Len(); Comparison++)
+            if(Input[Index] == Input[Comparison]) return false;
+    return true;
 }
