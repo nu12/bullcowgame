@@ -22,10 +22,11 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	TArray<FString> Words;
 	FString HiddenWord;
 
-	void AskForGuess() const;
 	void GenerateNewGame();
-	void EndGameWithMessage(const FString& Message);
-	void PrintBullsAndCows(const FString& Input);
-	bool PlayerHasLivesLeft();
+	void AskForGuess() const;
+	void ProcessGuess(const FString& Guess);
 	bool IsIsogram(const FString& Input) const;
+	bool PlayerHasLivesLeft();
+	void PrintBullsAndCows(const FString& Input);
+	void EndGameWithMessage(const FString& Message);
 };
