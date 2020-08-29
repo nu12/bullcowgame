@@ -81,29 +81,26 @@ bool UBullCowCartridge::PlayerHasLivesLeft(){
 }
 
 void UBullCowCartridge::PrintBullsAndCows(const FString& Guess) const{
-    int32 Bulls, Cows;
-    GetBullsAndCowsCount(Guess, Bulls, Cows); // Using out parameters
-    PrintLine(TEXT("Bulls: %d | Cows: %d."), Bulls, Cows);
+    FBullCowCounter Counter; // Values are already initiated in header file
+    GetBullsAndCowsCount(Guess, Counter); // Using out parameters
+    PrintLine(TEXT("Bulls: %d | Cows: %d."), Counter.Bulls, Counter.Cows);
     PrintLine(TEXT("Bull: right letter, right position."));
     PrintLine(TEXT("Cow: right letter, wrong position."));
 }
 
 
-void UBullCowCartridge::GetBullsAndCowsCount(const FString& Guess, int32& BullCount, int32& CowCount) const{ // Out parameters (return)
-    BullCount = 0;
-    CowCount = 0;
-
+void UBullCowCartridge::GetBullsAndCowsCount(const FString& Guess, FBullCowCounter& Counter) const{ // Out parameters (return)
     for (int32 GuessIndex = 0; GuessIndex < Guess.Len(); GuessIndex++)
     {
         if(Guess[GuessIndex] == HiddenWord[GuessIndex]){
-            BullCount++;
+            Counter.Bulls++;
             continue;
         }
 
         for (int32 HiddenIndex = 0; HiddenIndex < Guess.Len(); HiddenIndex++)
         {
             if(Guess[GuessIndex] == HiddenWord[HiddenIndex]){
-                CowCount++;
+                Counter.Cows++;
                 break;
             }
         }
