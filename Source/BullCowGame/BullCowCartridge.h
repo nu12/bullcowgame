@@ -27,6 +27,7 @@ class BULLCOWGAME_API UBullCowCartridge : public UCartridge
 	void ProcessGuess(const FString& Guess);
 	bool IsIsogram(const FString& Input) const;
 	bool PlayerHasLivesLeft();
-	void PrintBullsAndCows(const FString& Input);
+	void PrintBullsAndCows(const FString& Guess) const;
+	void GetBullsAndCowsCount(const FString& Guess, int32& BullCount, int32& CowCount) const;
 	void EndGameWithMessage(const FString& Message);
 };
