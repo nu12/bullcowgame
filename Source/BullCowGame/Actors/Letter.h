@@ -35,9 +35,6 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		UStaticMeshComponent* StaticMesh;
 
-	UPROPERTY(EditAnywhere)
-		UProjectileMovementComponent* ProjectileComponent;
-
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		TArray<UStaticMesh*> AllStaticMeshes;
 

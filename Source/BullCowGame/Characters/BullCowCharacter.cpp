@@ -42,7 +42,7 @@ void ABullCowCharacter::Tick(float DeltaTime)
 
 		FVector EndLocation = StartLocation + StartRotation.Vector() * 200.f;
 		UPrimitiveComponent* Component = PhysicsHandlerComponent->GetGrabbedComponent();
-		Component->SetWorldRotation(FRotator(70.f, GetActorRotation().Yaw, GetActorRotation().Roll));
+		//Component->SetWorldRotation(FRotator(70.f, GetActorRotation().Yaw, GetActorRotation().Roll));
 		PhysicsHandlerComponent->SetTargetLocation(EndLocation);
 	}
 
