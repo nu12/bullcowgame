@@ -14,8 +14,8 @@ UCLASS()
 class BULLCOWGAME_API ACow : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ACow();
 
@@ -28,19 +28,19 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = " ")
-	UBoxComponent* RootCapsule;
+		UBoxComponent* RootCapsule;
 	UPROPERTY(VisibleAnywhere)
-	UStaticMeshComponent* StaticMesh;
+		UStaticMeshComponent* StaticMesh;
 	UPROPERTY(VisibleAnywhere)
-	UBillboardComponent* Billboard;
+		UBillboardComponent* Billboard;
 	UPROPERTY(VisibleAnywhere)
-	UWidgetComponent* ActionWidget;
+		UWidgetComponent* ActionWidget;
 
 	UPROPERTY(EditAnywhere)
-	bool bCanMove = false;
+		bool bCanMove = false;
 
 	UPROPERTY(EditAnywhere)
-	FString TextToDisplay = TEXT("");
+		FString TextToDisplay = TEXT("");
 
 	FTimerHandle Timer;
 };

@@ -6,12 +6,40 @@
 #include "BullCowGame/BullCowGameGameModeBase.h"
 #include "BullCowGameMachineGameMode.generated.h"
 
-/**
- * 
- */
+class ABullCowGameMachine;
+
 UCLASS()
 class BULLCOWGAME_API ABullCowGameMachineGameMode : public ABullCowGameGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	void HandleGameStart() override;
+
+	void HandleGameOver() override;
+
+	void HandleGamePause() override;
+
+	void HandleGameResume() override;
+
+	UFUNCTION(BlueprintCallable)
+		void LeverActivation(ABullCowGameMachine* MachineRef);
+
+protected:
+	void BeginPlay() override;
+
+private:
+	bool bGameHasStarted = false;
+	bool bGameIsPaused = true;
+	bool bSelectNewWord = true;
+
+	TArray<TCHAR> CharactersToSpawn;
+
+	void SpawnNextLetter();
+
+	ABullCowGameMachine* MachineRef = nullptr;
+
+	FString HiddenWord;
+
+	FTimerHandle SpawnLetterTimerHandle;
 };

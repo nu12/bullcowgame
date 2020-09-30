@@ -9,7 +9,7 @@
 // Sets default values
 ACow::ACow()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	RootCapsule = CreateDefaultSubobject<UBoxComponent>(TEXT("Capsule"));
@@ -26,12 +26,12 @@ ACow::ACow()
 void ACow::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (bCanMove)
 	{
 		GetWorld()->GetTimerManager().SetTimer(Timer, this, &ACow::Move, 3.f);
 	}
-	
+
 }
 
 void ACow::Move()

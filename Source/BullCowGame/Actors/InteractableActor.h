@@ -10,18 +10,21 @@ UCLASS()
 class BULLCOWGAME_API AInteractableActor : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	AInteractableActor();
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Needs to be implemented in the child class
 	UFUNCTION(BlueprintCallable)
-	virtual void Interact();
+		virtual void Interact();
+
 
 };

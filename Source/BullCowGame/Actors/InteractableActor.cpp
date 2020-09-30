@@ -8,9 +8,14 @@ AInteractableActor::AInteractableActor()
 	PrimaryActorTick.bCanEverTick = false;
 }
 
+void AInteractableActor::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
 void AInteractableActor::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 }
 
 

@@ -6,14 +6,23 @@
 #include "GameFramework/Actor.h"
 #include "BullCowGameMachine.generated.h"
 
+class ATriggerVolume;
+class APointLight;
+class ALetter;
+
 UCLASS()
 class BULLCOWGAME_API ABullCowGameMachine : public AActor
 {
 	GENERATED_BODY()
-	
-public:	
+
+public:
 	// Sets default values for this actor's properties
 	ABullCowGameMachine();
+
+	void SpawnLetter(TCHAR chr);
+
+	UFUNCTION(BlueprintCallable)
+		APointLight* GetLightAt(int32 Index) const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -21,10 +30,18 @@ protected:
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = " ")
-	UStaticMeshComponent* Body;
+		UStaticMeshComponent* Body;
 	UPROPERTY(VisibleAnywhere, Category = " ")
-	USceneComponent* LetterSpawnPoint;
-	//Add sockets
-	//TArray triggervolume
+		USceneComponent* LetterSpawnPoint;
 
+	UPROPERTY(VisibleAnywhere, Category = "Setup")
+		TArray<ATriggerVolume*> TriggerVolumes;
+	UPROPERTY(VisibleAnywhere, Category = "Setup")
+		TArray<APointLight*> Lights;
+
+	UPROPERTY(VisibleAnywhere, Category = "Setup")
+		int32 MaxLetters = 8;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		TSubclassOf<ALetter> LetterClass;
 };

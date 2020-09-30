@@ -30,7 +30,7 @@ void ALever::Interact()
 {
 	if (!MachineRef) return;
 	if (bIsMoving) return;
-	//GameModeRef->LeverActivation(MachineRef);
+	GameModeRef->LeverActivation(MachineRef);
 	bIsMoving = true;
 }
 
