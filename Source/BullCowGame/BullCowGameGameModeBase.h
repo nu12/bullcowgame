@@ -7,11 +7,36 @@
 #include "BullCowGameGameModeBase.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class BULLCOWGAME_API ABullCowGameGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
-	
+
+public:
+	UFUNCTION(BlueprintCallable)
+		virtual void HandleGameStart() {};
+
+	UFUNCTION(BlueprintCallable)
+		virtual void HandleGameOver() {};
+
+	UFUNCTION(BlueprintCallable)
+		virtual void HandleGamePause() {};
+
+	UFUNCTION(BlueprintCallable)
+		virtual void HandleGameResume() {};
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void GameStart();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void GameOver();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void GamePause();
+
+	UFUNCTION(BlueprintImplementableEvent)
+		void GameResume();
+
 };
