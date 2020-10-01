@@ -55,10 +55,13 @@ void UGrabberComponent::Grab()
 
 	//Cast<AGrabbableActor>(Hit.GetActor())->Interact();
 
-	Cast<UPhysicsHandleComponent>(GetOwner()->GetComponentByClass(UPhysicsHandleComponent::StaticClass()))->GrabComponentAtLocation(
+
+	Cast<UPhysicsHandleComponent>(GetOwner()->GetComponentByClass(UPhysicsHandleComponent::StaticClass()))->GrabComponentAtLocationWithRotation(
+	//GrabComponentAtLocation(
 		Hit.GetComponent(),
 		NAME_None,
 		Hit.GetActor()->GetActorLocation()
+		, Hit.GetActor()->GetActorRotation()
 	);
 	//TestFunc<UGrabberComponent>();
 }

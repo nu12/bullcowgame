@@ -31,6 +31,17 @@ void ALetter::SetStaticMesh(int32 Index)
 	if (!AllStaticMeshes[Index]) return;
 	StaticMesh->SetStaticMesh(AllStaticMeshes[Index]);
 }
+
+void ALetter::SetLetterValue(TCHAR chr)
+{
+	LetterValue = chr;
+}
+
+TCHAR ALetter::GetLetterValue() const
+{
+	return LetterValue;
+}
+
 void ALetter::Launch()
 {
 	StaticMesh->AddForceAtLocation(StaticMesh->GetComponentRotation().Vector() * 5000.f, StaticMesh->GetComponentLocation());

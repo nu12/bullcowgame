@@ -57,6 +57,6 @@ void ABullCowGameMachine::SpawnLetter(TCHAR chr)
 	if (!LetterClass) return;
 	ALetter* SpawnedLetter = GetWorld()->SpawnActor<ALetter>(LetterClass, LetterSpawnPoint->GetComponentTransform());
 	SpawnedLetter->SetStaticMesh((int32)(chr)-65);
-	//SpawnedLetter->SetLetterValue(chr);
+	SpawnedLetter->SetLetterValue(chr);
 	SpawnedLetter->Launch();
 }

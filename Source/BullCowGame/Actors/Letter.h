@@ -20,6 +20,10 @@ public:
 
 	void SetStaticMesh(int32 Index);
 
+	TCHAR GetLetterValue() const;
+
+	void SetLetterValue(TCHAR chr);
+
 	void Launch();
 
 protected:
