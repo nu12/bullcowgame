@@ -37,14 +37,10 @@ void ABullCowCharacter::Tick(float DeltaTime)
 		FHitResult Hit;
 		FVector StartLocation;
 		FRotator StartRotation;
-
+		// Change to camera location/rotation
 		GetWorld()->GetFirstPlayerController()->GetActorEyesViewPoint(StartLocation, StartRotation);
-
-		FVector EndLocation = StartLocation + StartRotation.Vector() * 200.f;
-		UPrimitiveComponent* Component = PhysicsHandlerComponent->GetGrabbedComponent();
-		//Component->SetWorldRotation(FRotator(70.f, GetActorRotation().Yaw, GetActorRotation().Roll));
-		//PhysicsHandlerComponent->SetTargetLocation(EndLocation);
-		PhysicsHandlerComponent->SetTargetLocationAndRotation(EndLocation, FRotator(70.f, GetActorRotation().Yaw, GetActorRotation().Roll));
+		FVector EndLocation = StartLocation + StartRotation.Vector() * Reach;
+		PhysicsHandlerComponent->SetTargetLocationAndRotation(EndLocation, FRotator(GetActorRotation().Pitch + RotationWhenGrabbed, GetActorRotation().Yaw, GetActorRotation().Roll));
 	}
 
 }

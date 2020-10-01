@@ -29,13 +29,13 @@ void ACow::BeginPlay()
 
 	if (bCanMove)
 	{
-		GetWorld()->GetTimerManager().SetTimer(Timer, this, &ACow::Move, 3.f);
+		GetWorld()->GetTimerManager().SetTimer(Timer, this, &ACow::Move, MaxTimeToMove);
 	}
 
 }
 
 void ACow::Move()
 {
-	RootCapsule->AddForceAtLocation((GetActorUpVector() + GetActorForwardVector()) * 4000000, RootCapsule->GetComponentLocation());
-	GetWorld()->GetTimerManager().SetTimer(Timer, this, &ACow::Move, 3.f);
+	RootCapsule->AddForceAtLocation((GetActorUpVector() + GetActorForwardVector()) * ForceToApplyOnMove, RootCapsule->GetComponentLocation());
+	GetWorld()->GetTimerManager().SetTimer(Timer, this, &ACow::Move, MaxTimeToMove);
 }

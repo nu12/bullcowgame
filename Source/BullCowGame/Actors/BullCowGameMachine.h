@@ -31,19 +31,27 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	void SetupLight(const int32& i);
+
+	void SetupTriggerVolume(const int32& i);
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = " ")
 		UStaticMeshComponent* Body;
 	UPROPERTY(VisibleAnywhere, Category = " ")
 		USceneComponent* LetterSpawnPoint;
 
-	UPROPERTY(EditAnywhere, Category = "Setup")
-		TArray<ATriggerVolume*> TriggerVolumes;
 	UPROPERTY(VisibleAnywhere, Category = "Setup")
 		TArray<APointLight*> Lights;
 
 	UPROPERTY(VisibleAnywhere, Category = "Setup")
 		int32 MaxLetters = 8;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float LightAttenuationRadius = 20.f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		TArray<ATriggerVolume*> TriggerVolumes;
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		TSubclassOf<ALetter> LetterClass;

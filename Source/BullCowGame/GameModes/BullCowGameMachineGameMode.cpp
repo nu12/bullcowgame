@@ -40,7 +40,7 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 		HiddenWord = FString(TEXT("ABC"));
 		HiddenWord.ToUpper();
 		CharactersToSpawn = HiddenWord.GetCharArray();
-		GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, 1.f, true);
+		GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, LetterSpawnDelay, true);
 		return;
 	}
 

@@ -40,8 +40,8 @@ void ALever::Tick(float DeltaTime)
 
 	if (!bIsMoving) return;
 
-	float PitchDirection = (bReverse) ? -1.f : 1.f;
-	Lever->AddLocalRotation(FRotator(PitchDirection, 0.f, 0.f));
+	float PitchDirection = (bReverse) ? -LeverRotationSpeed : LeverRotationSpeed;
+	Lever->AddLocalRotation(FRotator(PitchDirection * DeltaTime, 0.f, 0.f));
 
 	if (Lever->GetComponentRotation().Pitch > EndRotation.Pitch) bReverse = true;
 	if (Lever->GetComponentRotation().Pitch < StartRotation.Pitch)

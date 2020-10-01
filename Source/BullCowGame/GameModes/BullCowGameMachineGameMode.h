@@ -42,4 +42,13 @@ private:
 	FString HiddenWord;
 
 	FTimerHandle SpawnLetterTimerHandle;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 InitialLevel = 3;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 MaxLevel = 7;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		float LetterSpawnDelay = 1.f;
 };

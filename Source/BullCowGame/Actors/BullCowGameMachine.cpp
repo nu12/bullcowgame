@@ -31,21 +31,27 @@ void ABullCowGameMachine::BeginPlay()
 
 	for (int32 i = 0; i < MaxLetters; i++)
 	{
-		// Light Setup
-		FString  SocketName = FString::Printf(TEXT("Light_%d"), i);
-		APointLight* Light = GetWorld()->SpawnActor<APointLight>(APointLight::StaticClass(), Body->GetSocketTransform(FName(*SocketName)));
-		Light->SetMobility(EComponentMobility::Movable);
-		Light->PointLightComponent->SetAttenuationRadius(20.f);
-		Light->PointLightComponent->SetIntensity(0.f);
-		Lights.Add(Light);
+		SetupLight(i);
+		SetupTriggerVolume(i);
+	}
+}
 
-		// TriggerVolume Setup
-		if (!TriggerVolumes[i])
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Trigger volume not found"), i);
-			return;
-		}
-		
+void ABullCowGameMachine::SetupLight(const int32& i)
+{
+	FString  SocketName = FString::Printf(TEXT("Light_%d"), i);
+	APointLight* Light = GetWorld()->SpawnActor<APointLight>(APointLight::StaticClass(), Body->GetSocketTransform(FName(*SocketName)));
+	Light->SetMobility(EComponentMobility::Movable);
+	Light->PointLightComponent->SetAttenuationRadius(LightAttenuationRadius);
+	Light->PointLightComponent->SetIntensity(0.f);
+	Lights.Add(Light);
+}
+
+void ABullCowGameMachine::SetupTriggerVolume(const int32& i)
+{
+	if (!TriggerVolumes[i])
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Pos %d: Trigger volume not found"), i);
+		return;
 	}
 }
 

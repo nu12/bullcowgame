@@ -36,10 +36,14 @@ public:
 
 private:
 	TCHAR LetterValue = 'A';
+
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		TArray<UStaticMesh*> AllStaticMeshes;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float LaunchSpeed = 5000.f;
 
 };

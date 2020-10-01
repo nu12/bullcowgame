@@ -42,6 +42,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		ABullCowGameMachine* MachineRef = nullptr;
 
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float LeverRotationSpeed = 80.f;
+
 	ABullCowGameMachineGameMode* GameModeRef = nullptr;
 
 	bool bReverse = false;

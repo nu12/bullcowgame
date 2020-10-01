@@ -57,4 +57,10 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		UPhysicsHandleComponent* PhysicsHandlerComponent = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float Reach = 200.f; // 2m
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float RotationWhenGrabbed = 90.f;
 };

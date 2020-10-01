@@ -7,12 +7,10 @@ ALetter::ALetter()
 {
 	AllStaticMeshes.AddDefaulted(26);
 
-
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	StaticMesh->SetSimulatePhysics(true);
 	RootComponent = StaticMesh;
 
-	
 }
 
 void ALetter::BeginPlay()
@@ -44,5 +42,5 @@ TCHAR ALetter::GetLetterValue() const
 
 void ALetter::Launch()
 {
-	StaticMesh->AddForceAtLocation(StaticMesh->GetComponentRotation().Vector() * 5000.f, StaticMesh->GetComponentLocation());
+	StaticMesh->AddForceAtLocation(StaticMesh->GetComponentRotation().Vector() * LaunchSpeed, StaticMesh->GetComponentLocation());
 }

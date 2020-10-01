@@ -36,10 +36,19 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UWidgetComponent* ActionWidget;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Setup")
 		bool bCanMove = false;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float ForceToApplyOnMove = 4000000.f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float MinTimeToMove = 1.f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float MaxTimeToMove = 4.f;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
 		FString TextToDisplay = TEXT("");
 
 	FTimerHandle Timer;
