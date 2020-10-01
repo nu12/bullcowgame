@@ -7,9 +7,6 @@
 #include "Camera/CameraComponent.h"
 #include "BullCowCharacter.generated.h"
 
-
-class UInteractionComponent;
-class UGrabberComponent;
 class UPhysicsHandleComponent;
 class ULineTraceComponent;
 
@@ -63,12 +60,6 @@ public:
 private:
 	UPROPERTY(EditAnywhere)
 		UCameraComponent* CameraComponent = nullptr;
-
-	UPROPERTY(EditAnywhere)
-		UInteractionComponent* InteractionComponent = nullptr;
-
-	UPROPERTY(EditAnywhere)
-		UGrabberComponent* GrabberComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
 		ULineTraceComponent* LineTraceComponent = nullptr;
