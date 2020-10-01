@@ -19,7 +19,7 @@ public:
 		virtual void HandleGameStart() {};
 
 	UFUNCTION(BlueprintCallable)
-		virtual void HandleGameOver() {};
+		virtual void HandleGameOver(bool PlayerWon) {};
 
 	UFUNCTION(BlueprintCallable)
 		virtual void HandleGamePause() {};
@@ -31,7 +31,7 @@ public:
 		void GameStart();
 
 	UFUNCTION(BlueprintImplementableEvent)
-		void GameOver();
+		void GameOver(bool PlayerWon);
 
 	UFUNCTION(BlueprintImplementableEvent)
 		void GamePause();

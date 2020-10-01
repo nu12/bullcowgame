@@ -16,7 +16,7 @@ class BULLCOWGAME_API ABullCowGameMachineGameMode : public ABullCowGameGameModeB
 public:
 	void HandleGameStart() override;
 
-	void HandleGameOver() override;
+	void HandleGameOver(bool PlayerWon) override;
 
 	void HandleGamePause() override;
 
@@ -27,19 +27,31 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void LeverActivation(ABullCowGameMachine* MachineRef);
 
+	UFUNCTION(BlueprintCallable)
+		int32 GetTimeRemaining() const;
+
 protected:
 	void BeginPlay() override;
 
 private:
 	bool bGameHasStarted = false;
+	bool bGameIsOver = false;
 	bool bGameIsPaused = true;
 	bool bSelectNewWord = true;
 
 	TArray<TCHAR> CharactersToSpawn;
 
-	TArray<TCHAR> CharacterPool;
+	TArray<TCHAR> CharactersPool;
 
 	TArray<TCHAR> SpawnedCharacters;
+
+	TArray<FString> WordList;
+
+	FString HiddenWord;
+
+	int32 CurrentLevel = 0;
+
+	int32 TimeRemaining = 0;
 
 	void SpawnNextLetter();
 
@@ -47,17 +59,26 @@ private:
 
 	ABullCowGameMachine* MachineRef = nullptr;
 
-	FString HiddenWord;
-
 	FTimerHandle SpawnLetterTimerHandle;
 
+	FTimerHandle TimeRemainingTimerHandle;
+
+	void TimeTick();
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 InitialTime = 120;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 TimeToAddWhenGuessIsCorrect = 60;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 TimeToRemoveWhenGuessIsWrong = 30;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 InitialLevel = 3;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 MaxLevel = 7;
-
-	int32 CurrentLevel = 3;
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		float LetterSpawnDelay = 1.f;

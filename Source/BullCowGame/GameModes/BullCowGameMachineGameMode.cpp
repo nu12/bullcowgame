@@ -13,8 +13,13 @@ void ABullCowGameMachineGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	// Load the words
+	WordList.Emplace("AXE");
+	WordList.Emplace("BOLD");
+	WordList.Emplace("WITCH");
+	WordList.Emplace("SWITCH");
+	WordList.Emplace("RANDOMS");
 
-	CharacterPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
+	CharactersPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
 }
 
 void ABullCowGameMachineGameMode::HandleGameStart()
@@ -22,7 +27,7 @@ void ABullCowGameMachineGameMode::HandleGameStart()
 	UE_LOG(LogTemp, Warning, TEXT("Game is has started"));
 
 	CurrentLevel = InitialLevel;
-	// Select new word = true
+	TimeRemaining = InitialTime;
 
 	bGameHasStarted = true;
 	bSelectNewWord = true;
@@ -30,9 +35,9 @@ void ABullCowGameMachineGameMode::HandleGameStart()
 }
 
 
-void ABullCowGameMachineGameMode::HandleGameOver()
+void ABullCowGameMachineGameMode::HandleGameOver(bool PlayerWon)
 {
-
+	bGameIsOver = true;
 }
 
 void ABullCowGameMachineGameMode::HandleGameResume()
@@ -50,12 +55,28 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 	}
 
 	UE_LOG(LogTemp, Warning, TEXT("Game is resumed"));
+	GetWorld()->GetTimerManager().SetTimer(TimeRemainingTimerHandle, this, &ABullCowGameMachineGameMode::TimeTick, 1.f, true);
 	bGameIsPaused = false;
+	GameResume();
 }
 
 void ABullCowGameMachineGameMode::SelectNewWord()
 {
-	HiddenWord = FString(TEXT("ABC"));
+	// Create array of words where Len == CurrentLevel
+	TArray<FString> WordsWithRightLength;
+	for (FString Word : WordList)
+	{
+		if (Word.Len() == CurrentLevel)
+		{
+			WordsWithRightLength.Emplace(Word);
+		}
+	}
+
+	// Select word
+	int32 WordRandomIndex = FMath::RandRange(0, WordsWithRightLength.Num() - 1);
+	HiddenWord = WordsWithRightLength[WordRandomIndex];
+
+	// Spawn characters 
 	CharactersToSpawn = HiddenWord.GetCharArray();
 	CharactersToSpawn.RemoveAt(CharactersToSpawn.Num() - 1); // Remove '\0'
 
@@ -63,8 +84,8 @@ void ABullCowGameMachineGameMode::SelectNewWord()
 	int32 CharactersLeft = RandomCharactersPerTurn;
 	while (CharactersLeft > 0)
 	{
-		int32 RandomIndex = FMath::RandRange(0, CharacterPool.Num() - 1);
-		TCHAR RandomChar = CharacterPool[RandomIndex];
+		int32 RandomIndex = FMath::RandRange(0, CharactersPool.Num() - 1);
+		TCHAR RandomChar = CharactersPool[RandomIndex];
 		if (!CharactersToSpawn.Contains(RandomChar))
 		{
 			CharactersToSpawn.Emplace(RandomChar);
@@ -79,22 +100,28 @@ void ABullCowGameMachineGameMode::SelectNewWord()
 void ABullCowGameMachineGameMode::HandleGamePause()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game is paused"));
+	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
 	bGameIsPaused = true;
 
 	bool bIsGuessCorrect = CheckGuess();
+
+	if (bIsGuessCorrect && CurrentLevel == MaxLevel)
+	{
+		HandleGameOver(true);
+		return;
+	}
 
 	if (bIsGuessCorrect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Guess is correct!!!"));
 		CurrentLevel++;
 		bSelectNewWord = true;
-		// Add time
+		TimeRemaining += TimeToAddWhenGuessIsCorrect;
 	}
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Guess is INcorrect!!!"));
-		// Remove Time
-		// Turn lights
+		TimeRemaining -= TimeToRemoveWhenGuessIsWrong;
 	}
 }
 
@@ -103,6 +130,7 @@ void ABullCowGameMachineGameMode::LeverActivation(ABullCowGameMachine* MachineRe
 {
 	if (!MachineRef) MachineRef = MachineReference;
 	if (!bGameHasStarted) return HandleGameStart();
+	if (bGameIsOver) return;
 	return (bGameIsPaused) ? HandleGameResume() : HandleGamePause();
 }
 
@@ -119,7 +147,7 @@ void ABullCowGameMachineGameMode::SpawnNextLetter()
 		}
 
 		CharactersToSpawn.Remove(NextChar);
-		CharacterPool.Remove(NextChar);
+		CharactersPool.Remove(NextChar);
 		return;
 	}
 	GetWorld()->GetTimerManager().ClearTimer(SpawnLetterTimerHandle);
@@ -182,4 +210,15 @@ bool ABullCowGameMachineGameMode::CheckGuess() const
 
 	}
 	return bIsGuessCorrect;
+}
+
+int32 ABullCowGameMachineGameMode::GetTimeRemaining() const
+{
+	return TimeRemaining;
+}
+
+void ABullCowGameMachineGameMode::TimeTick()
+{
+	UE_LOG(LogTemp, Warning, TEXT("Time remaining: %d"), TimeRemaining);
+	TimeRemaining--;
 }
