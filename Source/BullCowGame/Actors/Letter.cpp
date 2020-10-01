@@ -10,6 +10,7 @@ ALetter::ALetter()
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
 	StaticMesh->SetSimulatePhysics(true);
 	RootComponent = StaticMesh;
+	GrabbableComponent = StaticMesh;
 
 }
 

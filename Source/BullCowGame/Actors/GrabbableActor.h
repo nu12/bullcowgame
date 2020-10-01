@@ -15,9 +15,13 @@ public:
 	// Sets default values for this actor's properties
 	AGrabbableActor();
 
+	UPrimitiveComponent* GetGrabbableComponent() const;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+	
+	UPrimitiveComponent* GrabbableComponent = nullptr;
 
 public:
 	// Called every frame

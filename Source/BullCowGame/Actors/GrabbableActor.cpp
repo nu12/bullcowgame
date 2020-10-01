@@ -25,3 +25,7 @@ void AGrabbableActor::Tick(float DeltaTime)
 
 }
 
+UPrimitiveComponent* AGrabbableActor::GetGrabbableComponent() const
+{
+	return GrabbableComponent;
+}

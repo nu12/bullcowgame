@@ -2,12 +2,10 @@
 
 
 #include "BullCowCharacter.h"
-
 #include "BullCowGame/Components/LineTraceComponent.h"
-#include "BullCowGame/Components/InteractionComponent.h"
-#include "BullCowGame/Components/GrabberComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
 #include "BullCowGame/Actors/GrabbableActor.h"
+#include "BullCowGame/Actors/InteractableActor.h"
 
 // Sets default values
 ABullCowCharacter::ABullCowCharacter()
@@ -18,11 +16,8 @@ ABullCowCharacter::ABullCowCharacter()
 	CameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	CameraComponent->SetupAttachment(RootComponent);
 
-	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction Component"));
-	GrabberComponent = CreateDefaultSubobject<UGrabberComponent>(TEXT("Grabber Component"));
-	PhysicsHandlerComponent = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handler Component"));
 	LineTraceComponent = CreateDefaultSubobject<ULineTraceComponent>(TEXT("Line Trace Component"));
-
+	PhysicsHandlerComponent = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handler Component"));
 }
 
 // Called when the game starts or when spawned
@@ -79,20 +74,25 @@ void ABullCowCharacter::LookRight(float Value)
 
 void ABullCowCharacter::Interact()
 {
-	InteractionComponent->Interaction();
+	FCharacterReach CharacterReach(CameraComponent, Reach);
+	AInteractableActor* ActorToInteract = LineTraceComponent->Perform<AInteractableActor>(CharacterReach.StartLocation, CharacterReach.EndLocation);
+	if (ActorToInteract)
+	{
+		ActorToInteract->Interact();
+	}
 }
 
 void ABullCowCharacter::Grab()
 {
-	FHitResult Hit;
 	FCharacterReach CharacterReach(CameraComponent, Reach);
-	if (LineTraceComponent->Perform<AGrabbableActor>(Hit, CharacterReach.StartLocation, CharacterReach.EndLocation))
+	AGrabbableActor* ActorToGrab = LineTraceComponent->Perform<AGrabbableActor>(CharacterReach.StartLocation, CharacterReach.EndLocation);
+	if (ActorToGrab)
 	{
 		PhysicsHandlerComponent->GrabComponentAtLocationWithRotation(
-			Hit.GetComponent(),
+			ActorToGrab->GetGrabbableComponent(),
 			NAME_None,
-			Hit.GetActor()->GetActorLocation(),
-			Hit.GetActor()->GetActorRotation()
+			ActorToGrab->GetActorLocation(),
+			ActorToGrab->GetActorRotation()
 		);
 	}
 }
