@@ -20,6 +20,7 @@ void ABullCowGameMachineGameMode::BeginPlay()
 	WordList.Emplace("RANDOMS");
 
 	CharactersPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
+	CharactersPool.RemoveAt(CharactersPool.Num() - 1); // Remove '\0'
 }
 
 void ABullCowGameMachineGameMode::HandleGameStart()
@@ -219,6 +220,9 @@ int32 ABullCowGameMachineGameMode::GetTimeRemaining() const
 
 void ABullCowGameMachineGameMode::TimeTick()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Time remaining: %d"), TimeRemaining);
 	TimeRemaining--;
+	if (TimeRemaining < 0)
+	{
+		HandleGameOver(false);
+	}
 }
