@@ -22,7 +22,10 @@ public:
 	void SpawnLetter(TCHAR chr);
 
 	UFUNCTION(BlueprintCallable)
-		APointLight* GetLightAt(int32 Index) const;
+	APointLight* GetLightAt(int32 Index) const;
+
+	UFUNCTION(BlueprintCallable)
+	ATriggerVolume* GetTriggerAt(int32 Index) const;
 
 protected:
 	// Called when the game starts or when spawned
@@ -34,7 +37,7 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = " ")
 		USceneComponent* LetterSpawnPoint;
 
-	UPROPERTY(VisibleAnywhere, Category = "Setup")
+	UPROPERTY(EditAnywhere, Category = "Setup")
 		TArray<ATriggerVolume*> TriggerVolumes;
 	UPROPERTY(VisibleAnywhere, Category = "Setup")
 		TArray<APointLight*> Lights;

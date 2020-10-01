@@ -20,6 +20,8 @@ ABullCowGameMachine::ABullCowGameMachine()
 
 	RootComponent = Body;
 	LetterSpawnPoint->SetupAttachment(Body);
+
+	TriggerVolumes.AddDefaulted(MaxLetters);
 }
 
 // Called when the game starts or when spawned
@@ -38,18 +40,23 @@ void ABullCowGameMachine::BeginPlay()
 		Lights.Add(Light);
 
 		// TriggerVolume Setup
-		SocketName = FString::Printf(TEXT("Trigger_%d"), i);
-		ATriggerVolume* Trigger = GetWorld()->SpawnActor<ATriggerVolume>(ATriggerVolume::StaticClass(), Body->GetSocketTransform(FName(*SocketName)));
-		Trigger->SetActorScale3D(FVector(0.175f, 0.175f, 0.175f));
-		TriggerVolumes.Add(Trigger);
-
-		DrawDebugBox(GetWorld(), Trigger->GetActorLocation(), Trigger->GetActorScale() * 100, FColor::Cyan, true, -1, 0, 5);
+		if (!TriggerVolumes[i])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Trigger volume not found"), i);
+			return;
+		}
+		
 	}
 }
 
 APointLight* ABullCowGameMachine::GetLightAt(int32 Index) const
 {
 	return Lights[Index];
+}
+
+ATriggerVolume* ABullCowGameMachine::GetTriggerAt(int32 Index) const
+{
+	return TriggerVolumes[Index];
 }
 
 void ABullCowGameMachine::SpawnLetter(TCHAR chr)

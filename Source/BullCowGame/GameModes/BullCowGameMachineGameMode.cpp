@@ -3,8 +3,10 @@
 
 #include "BullCowGameMachineGameMode.h"
 #include "BullCowGame/Actors/BullCowGameMachine.h"
+#include "BullCowGame/Actors/Letter.h"
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
+#include "Engine/TriggerVolume.h"
 
 
 void ABullCowGameMachineGameMode::BeginPlay()
@@ -58,13 +60,82 @@ void ABullCowGameMachineGameMode::HandleGamePause()
 	bGameIsPaused = true;
 
 
-	// If word is correct
+	bool bIsGuessCorrect = true;
+
+	for (int32 i = 0; i < HiddenWord.Len(); i++)
+	{
+		ATriggerVolume* Trigger = MachineRef->GetTriggerAt(i);
+		TArray<AActor*> ActorsInTrigger;
+		Trigger->GetOverlappingActors(ActorsInTrigger, ALetter::StaticClass());
+		
+		UE_LOG(LogTemp, Warning, TEXT("Trigger: %s %d"), *Trigger->GetName(), ActorsInTrigger.Num());
+
+		if (ActorsInTrigger.Num() == 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: No actor in the trigger"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Yellow);
+			// Red light
+			continue;
+		}
+
+		if (ActorsInTrigger.Num() > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: More than 1 actor in the trigger"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			// Red light
+			continue;
+		}
+
+		ALetter* Letter = Cast<ALetter>(ActorsInTrigger[0]);
+
+		if (!Letter)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Cast failed"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			continue;
+		}
+
+		if (Letter->GetLetterValue() != HiddenWord[i])
+		{
+			// If wrong position
+				// Yellow light
+				// continue
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter incorrect"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			// Green light
+			continue;
+		}
+		
+		if (Letter->GetLetterValue() == HiddenWord[i])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter correct"), i);
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Green);
+			// Green light
+			continue;
+		}
+
+		
+		
+		
+	}
+
+	if (bIsGuessCorrect)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Guess is correct!!!"));
 		// Level ++
 		// Select new word = true
 		// Add time
-	// Else
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Guess is INcorrect!!!"));
 		// Remove Time
 		// Turn lights
+	}
 }
 
 
