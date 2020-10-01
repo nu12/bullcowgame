@@ -2,10 +2,12 @@
 
 
 #include "BullCowCharacter.h"
-#include "Camera/CameraComponent.h"
+
+#include "BullCowGame/Components/LineTraceComponent.h"
 #include "BullCowGame/Components/InteractionComponent.h"
 #include "BullCowGame/Components/GrabberComponent.h"
 #include "PhysicsEngine/PhysicsHandleComponent.h"
+#include "BullCowGame/Actors/GrabbableActor.h"
 
 // Sets default values
 ABullCowCharacter::ABullCowCharacter()
@@ -19,6 +21,8 @@ ABullCowCharacter::ABullCowCharacter()
 	InteractionComponent = CreateDefaultSubobject<UInteractionComponent>(TEXT("Interaction Component"));
 	GrabberComponent = CreateDefaultSubobject<UGrabberComponent>(TEXT("Grabber Component"));
 	PhysicsHandlerComponent = CreateDefaultSubobject<UPhysicsHandleComponent>(TEXT("Physics Handler Component"));
+	LineTraceComponent = CreateDefaultSubobject<ULineTraceComponent>(TEXT("Line Trace Component"));
+
 }
 
 // Called when the game starts or when spawned
@@ -34,13 +38,8 @@ void ABullCowCharacter::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	if (PhysicsHandlerComponent->GetGrabbedComponent())
 	{
-		FHitResult Hit;
-		FVector StartLocation;
-		FRotator StartRotation;
-		// Change to camera location/rotation
-		GetWorld()->GetFirstPlayerController()->GetActorEyesViewPoint(StartLocation, StartRotation);
-		FVector EndLocation = StartLocation + StartRotation.Vector() * Reach;
-		PhysicsHandlerComponent->SetTargetLocationAndRotation(EndLocation, FRotator(GetActorRotation().Pitch + RotationWhenGrabbed, GetActorRotation().Yaw, GetActorRotation().Roll));
+		FCharacterReach CharacterReach(CameraComponent, Reach);
+		PhysicsHandlerComponent->SetTargetLocationAndRotation(CharacterReach.EndLocation, FRotator(GetActorRotation().Pitch + RotationWhenGrabbed, GetActorRotation().Yaw, GetActorRotation().Roll));
 	}
 
 }
@@ -85,10 +84,20 @@ void ABullCowCharacter::Interact()
 
 void ABullCowCharacter::Grab()
 {
-	GrabberComponent->Grab();
+	FHitResult Hit;
+	FCharacterReach CharacterReach(CameraComponent, Reach);
+	if (LineTraceComponent->Perform<AGrabbableActor>(Hit, CharacterReach.StartLocation, CharacterReach.EndLocation))
+	{
+		PhysicsHandlerComponent->GrabComponentAtLocationWithRotation(
+			Hit.GetComponent(),
+			NAME_None,
+			Hit.GetActor()->GetActorLocation(),
+			Hit.GetActor()->GetActorRotation()
+		);
+	}
 }
 
 void ABullCowCharacter::Release()
 {
-	GrabberComponent->Release();
+	PhysicsHandlerComponent->ReleaseComponent();
 }

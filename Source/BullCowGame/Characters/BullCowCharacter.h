@@ -4,12 +4,27 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Camera/CameraComponent.h"
 #include "BullCowCharacter.generated.h"
 
-class UCameraComponent;
+
 class UInteractionComponent;
 class UGrabberComponent;
 class UPhysicsHandleComponent;
+class ULineTraceComponent;
+
+struct FCharacterReach
+{
+	FVector StartLocation;
+	FVector EndLocation;
+
+	FCharacterReach(UCameraComponent* CameraComponent, float Reach)
+	{
+		StartLocation = CameraComponent->GetComponentLocation();
+		FRotator StartRotation = CameraComponent->GetComponentRotation();
+		EndLocation = StartLocation + StartRotation.Vector() * Reach;
+	}
+};
 
 UCLASS()
 class BULLCOWGAME_API ABullCowCharacter : public ACharacter
@@ -54,6 +69,9 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		UGrabberComponent* GrabberComponent = nullptr;
+
+	UPROPERTY(EditAnywhere)
+		ULineTraceComponent* LineTraceComponent = nullptr;
 
 	UPROPERTY(EditAnywhere)
 		UPhysicsHandleComponent* PhysicsHandlerComponent = nullptr;
