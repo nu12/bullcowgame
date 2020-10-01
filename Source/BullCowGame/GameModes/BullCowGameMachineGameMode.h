@@ -22,6 +22,8 @@ public:
 
 	void HandleGameResume() override;
 
+	void SelectNewWord();
+
 	UFUNCTION(BlueprintCallable)
 		void LeverActivation(ABullCowGameMachine* MachineRef);
 
@@ -35,7 +37,13 @@ private:
 
 	TArray<TCHAR> CharactersToSpawn;
 
+	TArray<TCHAR> CharacterPool;
+
+	TArray<TCHAR> SpawnedCharacters;
+
 	void SpawnNextLetter();
+
+	bool CheckGuess() const;
 
 	ABullCowGameMachine* MachineRef = nullptr;
 
@@ -49,6 +57,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 MaxLevel = 7;
 
+	int32 CurrentLevel = 3;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		float LetterSpawnDelay = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+		int32 RandomCharactersPerTurn = 2;
 };

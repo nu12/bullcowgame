@@ -13,13 +13,15 @@ void ABullCowGameMachineGameMode::BeginPlay()
 {
 	Super::BeginPlay();
 	// Load the words
+
+	CharacterPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
 }
 
 void ABullCowGameMachineGameMode::HandleGameStart()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game is has started"));
 
-	// Set current level = initial level
+	CurrentLevel = InitialLevel;
 	// Select new word = true
 
 	bGameHasStarted = true;
@@ -37,10 +39,7 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 {
 	if (bSelectNewWord)
 	{
-		HiddenWord = FString(TEXT("ABC"));
-		HiddenWord.ToUpper();
-		CharactersToSpawn = HiddenWord.GetCharArray();
-		GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, LetterSpawnDelay, true);
+		SelectNewWord();
 		return;
 	}
 
@@ -54,80 +53,41 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 	bGameIsPaused = false;
 }
 
+void ABullCowGameMachineGameMode::SelectNewWord()
+{
+	HiddenWord = FString(TEXT("ABC"));
+	CharactersToSpawn = HiddenWord.GetCharArray();
+	CharactersToSpawn.RemoveAt(CharactersToSpawn.Num() - 1); // Remove '\0'
+
+	// Spawn random characters
+	int32 CharactersLeft = RandomCharactersPerTurn;
+	while (CharactersLeft > 0)
+	{
+		int32 RandomIndex = FMath::RandRange(0, CharacterPool.Num() - 1);
+		TCHAR RandomChar = CharacterPool[RandomIndex];
+		if (!CharactersToSpawn.Contains(RandomChar))
+		{
+			CharactersToSpawn.Emplace(RandomChar);
+			CharactersLeft--;
+			UE_LOG(LogTemp, Warning, TEXT("Random char: %c"), RandomChar);
+		}
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, LetterSpawnDelay, true);
+}
+
 void ABullCowGameMachineGameMode::HandleGamePause()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game is paused"));
 	bGameIsPaused = true;
 
-
-	bool bIsGuessCorrect = true;
-
-	for (int32 i = 0; i < HiddenWord.Len(); i++)
-	{
-		ATriggerVolume* Trigger = MachineRef->GetTriggerAt(i);
-		TArray<AActor*> ActorsInTrigger;
-		Trigger->GetOverlappingActors(ActorsInTrigger, ALetter::StaticClass());
-		
-		UE_LOG(LogTemp, Warning, TEXT("Trigger: %s %d"), *Trigger->GetName(), ActorsInTrigger.Num());
-
-		if (ActorsInTrigger.Num() == 0)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: No actor in the trigger"), i);
-			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Yellow);
-			// Red light
-			continue;
-		}
-
-		if (ActorsInTrigger.Num() > 1)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: More than 1 actor in the trigger"), i);
-			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
-			// Red light
-			continue;
-		}
-
-		ALetter* Letter = Cast<ALetter>(ActorsInTrigger[0]);
-
-		if (!Letter)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Cast failed"), i);
-			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
-			continue;
-		}
-
-		if (Letter->GetLetterValue() != HiddenWord[i])
-		{
-			// If wrong position
-				// Yellow light
-				// continue
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter incorrect"), i);
-			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
-			// Green light
-			continue;
-		}
-		
-		if (Letter->GetLetterValue() == HiddenWord[i])
-		{
-			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter correct"), i);
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Green);
-			// Green light
-			continue;
-		}
-
-		
-		
-		
-	}
+	bool bIsGuessCorrect = CheckGuess();
 
 	if (bIsGuessCorrect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Guess is correct!!!"));
-		// Level ++
-		// Select new word = true
+		CurrentLevel++;
+		bSelectNewWord = true;
 		// Add time
 	}
 	else
@@ -148,16 +108,78 @@ void ABullCowGameMachineGameMode::LeverActivation(ABullCowGameMachine* MachineRe
 
 void ABullCowGameMachineGameMode::SpawnNextLetter()
 {
-	if (CharactersToSpawn.Num() > 1)
+	if (CharactersToSpawn.Num() > 0)
 	{
-		TCHAR NextChar = CharactersToSpawn[0];
-		CharactersToSpawn.RemoveAt(0);
-		UE_LOG(LogTemp, Warning, TEXT("Spawn %d"), CharactersToSpawn.Num());
-		UE_LOG(LogTemp, Warning, TEXT("Spawn %c"), NextChar);
-		MachineRef->SpawnLetter(NextChar);
+		int32 RandomIndex = FMath::RandRange(0, CharactersToSpawn.Num() - 1);
+		TCHAR NextChar = CharactersToSpawn[RandomIndex];
+		if (!SpawnedCharacters.Contains(NextChar))
+		{
+			SpawnedCharacters.Emplace(NextChar);
+			MachineRef->SpawnLetter(NextChar);
+		}
+
+		CharactersToSpawn.Remove(NextChar);
+		CharacterPool.Remove(NextChar);
 		return;
 	}
 	GetWorld()->GetTimerManager().ClearTimer(SpawnLetterTimerHandle);
 	bSelectNewWord = false;
 	HandleGameResume();
+}
+
+bool ABullCowGameMachineGameMode::CheckGuess() const
+{
+
+	bool bIsGuessCorrect = true;
+
+	for (int32 i = 0; i < HiddenWord.Len(); i++)
+	{
+		ATriggerVolume* Trigger = MachineRef->GetTriggerAt(i);
+		TArray<AActor*> ActorsInTrigger;
+		Trigger->GetOverlappingActors(ActorsInTrigger, ALetter::StaticClass());
+
+		if (ActorsInTrigger.Num() == 0)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: No actor in the trigger"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			continue;
+		}
+
+		if (ActorsInTrigger.Num() > 1)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: More than 1 actor in the trigger"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			continue;
+		}
+
+		ALetter* Letter = Cast<ALetter>(ActorsInTrigger[0]);
+
+		if (!Letter)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Cast failed"), i);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			continue;
+		}
+
+		if (Letter->GetLetterValue() != HiddenWord[i])
+		{
+			FLinearColor LightColor = (HiddenWord.GetCharArray().Contains(Letter->GetLetterValue())) ? FLinearColor::Yellow : FLinearColor::Red;
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter incorrect %c x %c"), i, Letter->GetLetterValue(), HiddenWord[i]);
+			bIsGuessCorrect = false;
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(LightColor);
+			continue;
+		}
+
+		if (Letter->GetLetterValue() == HiddenWord[i])
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter correct %c x %c"), i, Letter->GetLetterValue(), HiddenWord[i]);
+			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Green);
+			continue;
+		}
+
+	}
+	return bIsGuessCorrect;
 }
