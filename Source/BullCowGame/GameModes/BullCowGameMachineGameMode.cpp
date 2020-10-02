@@ -8,6 +8,8 @@
 #include "Components/PointLightComponent.h"
 #include "Engine/TriggerVolume.h"
 #include "BullCowGame/Characters/BullCowCharacter.h"
+#include "Misc/FileHelper.h"
+#include "Misc/Paths.h"
 
 
 void ABullCowGameMachineGameMode::BeginPlay()
@@ -15,18 +17,8 @@ void ABullCowGameMachineGameMode::BeginPlay()
 	Super::BeginPlay();
 
 	PlayerRef = Cast<ABullCowCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
-
-	// Load the words
-	WordList.Emplace("AXE");
-	WordList.Emplace("BOLD");
-	WordList.Emplace("WITCH");
-	WordList.Emplace("SWITCH");
-	WordList.Emplace("RANDOMS");
-
-	// Keep only isograms
-
-	CharactersPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
-	CharactersPool.RemoveAt(CharactersPool.Num() - 1); // Remove '\0'
+	LoadWordListFromFile();
+	CharactersPool = GetCharArrayWithoutNullCharacter(FString("ABCDEFGHIJKLMNOPQRSTUVXZYW"));
 }
 
 void ABullCowGameMachineGameMode::HandleGameStart()
@@ -74,27 +66,11 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 	GameResume();
 }
 
-
 void ABullCowGameMachineGameMode::SelectNewWord()
 {
-	TArray<FString> WordsWithRightLength = GetWordsWithLength(CurrentLevel);
-	
-	HiddenWord = SelectRandomElementFromArray<FString>(WordsWithRightLength);
-
-	// Spawn characters 
-	CharactersToSpawn = HiddenWord.GetCharArray();
-	CharactersToSpawn.RemoveAt(CharactersToSpawn.Num() - 1); // Remove '\0'
-
-	// Spawn random characters
-	int32 CharactersLeft = RandomCharactersPerTurn;
-	while (CharactersLeft > 0)
-	{
-		TCHAR RandomChar = SelectRandomElementFromArray<TCHAR>(CharactersPool);
-		if (CharactersToSpawn.Contains(RandomChar)) continue;
-		CharactersToSpawn.Emplace(RandomChar);
-		CharactersLeft--;
-	}
-
+	HiddenWord = SelectRandomElementFromArray<FString>(GetWordsWithLength(CurrentLevel));
+	CharactersToSpawn = GetCharArrayWithoutNullCharacter(HiddenWord);
+	AddRandomCharactersTo(CharactersToSpawn, RandomCharactersPerTurn);
 	GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, LetterSpawnDelay, true);
 }
 
@@ -137,8 +113,11 @@ void ABullCowGameMachineGameMode::SpawnNextLetter()
 	if (CharactersToSpawn.Num() > 0)
 	{
 		TCHAR NextChar = SelectRandomElementFromArray(CharactersToSpawn);
-		MachineRef->SpawnLetter(NextChar);
-		SpawnedCharacters.Emplace(NextChar);
+		if(!SpawnedCharacters.Contains(NextChar))
+		{
+			MachineRef->SpawnLetter(NextChar);
+			SpawnedCharacters.Emplace(NextChar);
+		}
 		CharactersToSpawn.Remove(NextChar);
 		CharactersPool.Remove(NextChar);
 		return;
@@ -241,7 +220,7 @@ void ABullCowGameMachineGameMode::SetPlayerGrabAndInteract(bool Value)
 
 void ABullCowGameMachineGameMode::ClearTimer(FTimerHandle TimerToClear)
 {
-	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
+	GetWorld()->GetTimerManager().ClearTimer(TimerToClear);
 }
 
 TArray<FString> ABullCowGameMachineGameMode::GetWordsWithLength(int32 Length)
@@ -255,4 +234,58 @@ TArray<FString> ABullCowGameMachineGameMode::GetWordsWithLength(int32 Length)
 		}
 	}
 	return WordsWithRightLength;
+}
+
+void ABullCowGameMachineGameMode::LoadWordListFromFile()
+{
+	// Load the words
+	TArray<FString> TempArray;
+	const FString WordListPath = FPaths::ProjectContentDir() / TEXT("WordList/HiddenWordList.txt");
+	FFileHelper::LoadFileToStringArray(TempArray, *WordListPath);
+
+	// Keep only isograms
+	for (FString Word : TempArray)
+		if (IsIsogram(Word)) WordList.Emplace(Word.ToUpper());
+}
+
+bool ABullCowGameMachineGameMode::IsIsogram(const FString& Input) const {
+	for (int32 Index = 0; Index < Input.Len(); Index++)
+		for (int32 Comparison = Index + 1; Comparison < Input.Len(); Comparison++)
+			if (Input[Index] == Input[Comparison]) return false;
+	return true;
+}
+
+TArray<TCHAR> ABullCowGameMachineGameMode::GetCharArrayWithoutNullCharacter(FString StringRef)
+{
+	TArray<TCHAR>OutArray = StringRef.GetCharArray();
+	OutArray.RemoveAt(OutArray.Num() - 1);
+	return OutArray;
+}
+
+void ABullCowGameMachineGameMode::AddRandomCharactersTo(TArray<TCHAR>& InArray, int32 NumberOfCharsToAdd)
+{
+	int32 CharactersLeft = FMath::Min(NumberOfCharsToAdd, CharactersPool.Num());
+	while (CharactersLeft > 0)
+	{
+		TCHAR RandomChar = SelectRandomElementFromArray<TCHAR>(CharactersPool);
+		if (InArray.Contains(RandomChar)) continue;
+		InArray.Emplace(RandomChar);
+		CharactersLeft--;
+	}
+
+}
+
+FString ABullCowGameMachineGameMode::GetHiddenWord() const
+{
+	return HiddenWord;
+}
+
+int32 ABullCowGameMachineGameMode::GetTimeToAddWhenGuessIsCorrect() const
+{
+	return TimeToAddWhenGuessIsCorrect;
+}
+
+int32 ABullCowGameMachineGameMode::GetTimeToRemoveWhenGuessIsWrong() const
+{
+	return TimeToRemoveWhenGuessIsWrong;
 }

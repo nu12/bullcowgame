@@ -25,7 +25,14 @@ public:
 
 	TArray<FString> GetWordsWithLength(int32 Length);
 
+	bool IsIsogram(const FString& Input) const;
+
 	void SelectNewWord();
+
+	void AddRandomCharactersTo(TArray<TCHAR>& InArray, int32 NumberOfCharsToAdd);
+
+	UFUNCTION(BlueprintCallable)
+	FString GetHiddenWord() const;
 
 	UFUNCTION(BlueprintCallable)
 		void LeverActivation(ABullCowGameMachine* MachineRef);
@@ -39,12 +46,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool GetGuessIsCorrect() const;
 
+	UFUNCTION(BlueprintCallable)
+		int32 GetTimeToAddWhenGuessIsCorrect() const;
+
+	UFUNCTION(BlueprintCallable)
+		int32 GetTimeToRemoveWhenGuessIsWrong() const;
+
 	void SetPlayerGrabAndInteract(bool Value);
 
 	void ClearTimer(FTimerHandle TimerToClear);
 
 protected:
 	void BeginPlay() override;
+
+	TArray<TCHAR> GetCharArrayWithoutNullCharacter(FString StringRef);
+
+	void LoadWordListFromFile();
 
 private:
 	bool bGameHasStarted = false;
