@@ -7,6 +7,7 @@
 #include "BullCowGameMachineGameMode.generated.h"
 
 class ABullCowGameMachine;
+class ABullCowCharacter;
 
 UCLASS()
 class BULLCOWGAME_API ABullCowGameMachineGameMode : public ABullCowGameGameModeBase
@@ -30,6 +31,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 		int32 GetTimeRemaining() const;
 
+	UFUNCTION(BlueprintCallable)
+		bool GetGameIsPaused() const;
+
+	UFUNCTION(BlueprintCallable)
+		bool GetGuessIsCorrect() const;
+
 protected:
 	void BeginPlay() override;
 
@@ -38,6 +45,7 @@ private:
 	bool bGameIsOver = false;
 	bool bGameIsPaused = true;
 	bool bSelectNewWord = true;
+	bool bGuessIsCorrect = true;
 
 	TArray<TCHAR> CharactersToSpawn;
 
@@ -58,12 +66,15 @@ private:
 	bool CheckGuess() const;
 
 	ABullCowGameMachine* MachineRef = nullptr;
+	ABullCowCharacter* PlayerRef = nullptr;
 
 	FTimerHandle SpawnLetterTimerHandle;
 
 	FTimerHandle TimeRemainingTimerHandle;
 
 	void TimeTick();
+
+	void CheckTimeIsOver(float Seconds);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 InitialTime = 120;

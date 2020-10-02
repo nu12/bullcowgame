@@ -57,6 +57,18 @@ public:
 
 	void Release();
 
+	UFUNCTION(BlueprintCallable)
+		void SetCanMove(bool Value);
+
+	UFUNCTION(BlueprintCallable)
+		void SetCanRotate(bool Value);
+
+	UFUNCTION(BlueprintCallable)
+		void SetCanInteract(bool Value);
+
+	UFUNCTION(BlueprintCallable)
+		void SetCanGrab(bool Value);
+
 private:
 	UPROPERTY(EditAnywhere)
 		UCameraComponent* CameraComponent = nullptr;
@@ -72,4 +84,16 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		float RotationWhenGrabbed = 90.f;
+
+	UPROPERTY(EditAnywhere, Category = "Gameplay")
+		bool bCanMove = true;
+
+	UPROPERTY(EditAnywhere, Category = "Gameplay")
+		bool bCanRotate = true;
+
+	UPROPERTY(EditAnywhere, Category = "Gameplay")
+		bool bCanInteract = true;
+
+	UPROPERTY(EditAnywhere, Category = "Gameplay")
+		bool bCanGrab = true;
 };

@@ -54,26 +54,31 @@ void ABullCowCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 void ABullCowCharacter::MoveForward(float Value)
 {
+	if (!bCanMove) return;
 	AddMovementInput(GetActorForwardVector(), Value);
 }
 
 void ABullCowCharacter::MoveRight(float Value)
 {
+	if (!bCanMove) return;
 	AddMovementInput(GetActorRightVector(), Value);
 }
 
 void ABullCowCharacter::LookUp(float Value)
 {
+	if (!bCanRotate) return;
 	AddControllerPitchInput(Value);
 }
 
 void ABullCowCharacter::LookRight(float Value)
 {
+	if (!bCanRotate) return;
 	AddControllerYawInput(Value);
 }
 
 void ABullCowCharacter::Interact()
 {
+	if (!bCanInteract) return;
 	FCharacterReach CharacterReach(CameraComponent, Reach);
 	AInteractableActor* ActorToInteract = LineTraceComponent->Perform<AInteractableActor>(CharacterReach.StartLocation, CharacterReach.EndLocation);
 	if (ActorToInteract)
@@ -84,6 +89,7 @@ void ABullCowCharacter::Interact()
 
 void ABullCowCharacter::Grab()
 {
+	if (!bCanGrab) return;
 	FCharacterReach CharacterReach(CameraComponent, Reach);
 	AGrabbableActor* ActorToGrab = LineTraceComponent->Perform<AGrabbableActor>(CharacterReach.StartLocation, CharacterReach.EndLocation);
 	if (ActorToGrab)
@@ -99,5 +105,27 @@ void ABullCowCharacter::Grab()
 
 void ABullCowCharacter::Release()
 {
+	if (!bCanGrab) return;
 	PhysicsHandlerComponent->ReleaseComponent();
 }
+
+void ABullCowCharacter::SetCanMove(bool Value)
+{
+	bCanMove = Value;
+}
+
+void ABullCowCharacter::SetCanRotate(bool Value)
+{
+	bCanRotate = Value;
+}
+
+void ABullCowCharacter::SetCanInteract(bool Value)
+{
+	bCanInteract = Value;
+}
+
+void ABullCowCharacter::SetCanGrab(bool Value)
+{
+	bCanGrab = Value;
+}
+

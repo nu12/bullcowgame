@@ -17,7 +17,6 @@ ALetter::ALetter()
 void ALetter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void ALetter::Tick(float DeltaTime)

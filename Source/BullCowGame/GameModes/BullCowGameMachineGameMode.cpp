@@ -7,11 +7,15 @@
 #include "Engine/PointLight.h"
 #include "Components/PointLightComponent.h"
 #include "Engine/TriggerVolume.h"
+#include "BullCowGame/Characters/BullCowCharacter.h"
 
 
 void ABullCowGameMachineGameMode::BeginPlay()
 {
 	Super::BeginPlay();
+
+	PlayerRef = Cast<ABullCowCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter());
+
 	// Load the words
 	WordList.Emplace("AXE");
 	WordList.Emplace("BOLD");
@@ -30,15 +34,22 @@ void ABullCowGameMachineGameMode::HandleGameStart()
 	CurrentLevel = InitialLevel;
 	TimeRemaining = InitialTime;
 
+	PlayerRef->SetCanInteract(false);
+	PlayerRef->SetCanGrab(false);
 	bGameHasStarted = true;
 	bSelectNewWord = true;
 	HandleGameResume();
+	GameStart();
 }
 
 
 void ABullCowGameMachineGameMode::HandleGameOver(bool PlayerWon)
 {
+	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
+	PlayerRef->SetCanInteract(false);
+	PlayerRef->SetCanGrab(false);
 	bGameIsOver = true;
+	GameOver(PlayerWon);
 }
 
 void ABullCowGameMachineGameMode::HandleGameResume()
@@ -57,6 +68,8 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game is resumed"));
 	GetWorld()->GetTimerManager().SetTimer(TimeRemainingTimerHandle, this, &ABullCowGameMachineGameMode::TimeTick, 1.f, true);
+	PlayerRef->SetCanInteract(true);
+	PlayerRef->SetCanGrab(true);
 	bGameIsPaused = false;
 	GameResume();
 }
@@ -102,28 +115,28 @@ void ABullCowGameMachineGameMode::HandleGamePause()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Game is paused"));
 	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
+	PlayerRef->SetCanGrab(false);
 	bGameIsPaused = true;
+	GamePause();
 
-	bool bIsGuessCorrect = CheckGuess();
+	bGuessIsCorrect = CheckGuess();
 
-	if (bIsGuessCorrect && CurrentLevel == MaxLevel)
+	if (bGuessIsCorrect && CurrentLevel == MaxLevel)
 	{
 		HandleGameOver(true);
 		return;
 	}
 
-	if (bIsGuessCorrect)
+	if (bGuessIsCorrect)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Guess is correct!!!"));
 		CurrentLevel++;
 		bSelectNewWord = true;
 		TimeRemaining += TimeToAddWhenGuessIsCorrect;
+		return;
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Guess is INcorrect!!!"));
-		TimeRemaining -= TimeToRemoveWhenGuessIsWrong;
-	}
+	UE_LOG(LogTemp, Warning, TEXT("Guess is INcorrect!!!"));
+	CheckTimeIsOver(TimeRemaining -= TimeToRemoveWhenGuessIsWrong);
 }
 
 
@@ -220,9 +233,23 @@ int32 ABullCowGameMachineGameMode::GetTimeRemaining() const
 
 void ABullCowGameMachineGameMode::TimeTick()
 {
-	TimeRemaining--;
-	if (TimeRemaining < 0)
+	CheckTimeIsOver(--TimeRemaining);
+}
+
+void ABullCowGameMachineGameMode::CheckTimeIsOver(float Seconds)
+{
+	if (Seconds < 0)
 	{
 		HandleGameOver(false);
 	}
+}
+
+bool ABullCowGameMachineGameMode::GetGameIsPaused() const
+{
+	return bGameIsPaused;
+}
+
+bool ABullCowGameMachineGameMode::GetGuessIsCorrect() const
+{
+	return bGuessIsCorrect;
 }
