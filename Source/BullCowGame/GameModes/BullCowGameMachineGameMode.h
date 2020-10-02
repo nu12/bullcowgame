@@ -23,6 +23,8 @@ public:
 
 	void HandleGameResume() override;
 
+	TArray<FString> GetWordsWithLength(int32 Length);
+
 	void SelectNewWord();
 
 	UFUNCTION(BlueprintCallable)
@@ -36,6 +38,10 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool GetGuessIsCorrect() const;
+
+	void SetPlayerGrabAndInteract(bool Value);
+
+	void ClearTimer(FTimerHandle TimerToClear);
 
 protected:
 	void BeginPlay() override;
@@ -96,4 +102,11 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 RandomCharactersPerTurn = 2;
+
+	template <class T>
+	T SelectRandomElementFromArray(TArray<T> InArray)
+	{
+		int32 RandomIndex = FMath::RandRange(0, InArray.Num() - 1);
+		return InArray[RandomIndex];
+	};
 };

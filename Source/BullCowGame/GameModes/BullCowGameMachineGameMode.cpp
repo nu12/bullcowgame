@@ -23,21 +23,23 @@ void ABullCowGameMachineGameMode::BeginPlay()
 	WordList.Emplace("SWITCH");
 	WordList.Emplace("RANDOMS");
 
+	// Keep only isograms
+
 	CharactersPool = FString("ABCDEFGHIJKLMNOPQRSTUVXZYW").GetCharArray();
 	CharactersPool.RemoveAt(CharactersPool.Num() - 1); // Remove '\0'
 }
 
 void ABullCowGameMachineGameMode::HandleGameStart()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Game is has started"));
-
+	// Set gameplay variables
 	CurrentLevel = InitialLevel;
 	TimeRemaining = InitialTime;
-
-	PlayerRef->SetCanInteract(false);
-	PlayerRef->SetCanGrab(false);
 	bGameHasStarted = true;
 	bSelectNewWord = true;
+
+	// Wait letters spawning
+	SetPlayerGrabAndInteract(false);
+	
 	HandleGameResume();
 	GameStart();
 }
@@ -45,9 +47,8 @@ void ABullCowGameMachineGameMode::HandleGameStart()
 
 void ABullCowGameMachineGameMode::HandleGameOver(bool PlayerWon)
 {
-	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
-	PlayerRef->SetCanInteract(false);
-	PlayerRef->SetCanGrab(false);
+	ClearTimer(TimeRemainingTimerHandle);
+	SetPlayerGrabAndInteract(false);
 	bGameIsOver = true;
 	GameOver(PlayerWon);
 }
@@ -68,27 +69,17 @@ void ABullCowGameMachineGameMode::HandleGameResume()
 
 	UE_LOG(LogTemp, Warning, TEXT("Game is resumed"));
 	GetWorld()->GetTimerManager().SetTimer(TimeRemainingTimerHandle, this, &ABullCowGameMachineGameMode::TimeTick, 1.f, true);
-	PlayerRef->SetCanInteract(true);
-	PlayerRef->SetCanGrab(true);
+	SetPlayerGrabAndInteract(true);
 	bGameIsPaused = false;
 	GameResume();
 }
 
+
 void ABullCowGameMachineGameMode::SelectNewWord()
 {
-	// Create array of words where Len == CurrentLevel
-	TArray<FString> WordsWithRightLength;
-	for (FString Word : WordList)
-	{
-		if (Word.Len() == CurrentLevel)
-		{
-			WordsWithRightLength.Emplace(Word);
-		}
-	}
-
-	// Select word
-	int32 WordRandomIndex = FMath::RandRange(0, WordsWithRightLength.Num() - 1);
-	HiddenWord = WordsWithRightLength[WordRandomIndex];
+	TArray<FString> WordsWithRightLength = GetWordsWithLength(CurrentLevel);
+	
+	HiddenWord = SelectRandomElementFromArray<FString>(WordsWithRightLength);
 
 	// Spawn characters 
 	CharactersToSpawn = HiddenWord.GetCharArray();
@@ -98,14 +89,10 @@ void ABullCowGameMachineGameMode::SelectNewWord()
 	int32 CharactersLeft = RandomCharactersPerTurn;
 	while (CharactersLeft > 0)
 	{
-		int32 RandomIndex = FMath::RandRange(0, CharactersPool.Num() - 1);
-		TCHAR RandomChar = CharactersPool[RandomIndex];
-		if (!CharactersToSpawn.Contains(RandomChar))
-		{
-			CharactersToSpawn.Emplace(RandomChar);
-			CharactersLeft--;
-			UE_LOG(LogTemp, Warning, TEXT("Random char: %c"), RandomChar);
-		}
+		TCHAR RandomChar = SelectRandomElementFromArray<TCHAR>(CharactersPool);
+		if (CharactersToSpawn.Contains(RandomChar)) continue;
+		CharactersToSpawn.Emplace(RandomChar);
+		CharactersLeft--;
 	}
 
 	GetWorld()->GetTimerManager().SetTimer(SpawnLetterTimerHandle, this, &ABullCowGameMachineGameMode::SpawnNextLetter, LetterSpawnDelay, true);
@@ -113,7 +100,6 @@ void ABullCowGameMachineGameMode::SelectNewWord()
 
 void ABullCowGameMachineGameMode::HandleGamePause()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Game is paused"));
 	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
 	PlayerRef->SetCanGrab(false);
 	bGameIsPaused = true;
@@ -129,13 +115,11 @@ void ABullCowGameMachineGameMode::HandleGamePause()
 
 	if (bGuessIsCorrect)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Guess is correct!!!"));
 		CurrentLevel++;
 		bSelectNewWord = true;
 		TimeRemaining += TimeToAddWhenGuessIsCorrect;
 		return;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("Guess is INcorrect!!!"));
 	CheckTimeIsOver(TimeRemaining -= TimeToRemoveWhenGuessIsWrong);
 }
 
@@ -152,19 +136,14 @@ void ABullCowGameMachineGameMode::SpawnNextLetter()
 {
 	if (CharactersToSpawn.Num() > 0)
 	{
-		int32 RandomIndex = FMath::RandRange(0, CharactersToSpawn.Num() - 1);
-		TCHAR NextChar = CharactersToSpawn[RandomIndex];
-		if (!SpawnedCharacters.Contains(NextChar))
-		{
-			SpawnedCharacters.Emplace(NextChar);
-			MachineRef->SpawnLetter(NextChar);
-		}
-
+		TCHAR NextChar = SelectRandomElementFromArray(CharactersToSpawn);
+		MachineRef->SpawnLetter(NextChar);
+		SpawnedCharacters.Emplace(NextChar);
 		CharactersToSpawn.Remove(NextChar);
 		CharactersPool.Remove(NextChar);
 		return;
 	}
-	GetWorld()->GetTimerManager().ClearTimer(SpawnLetterTimerHandle);
+	ClearTimer(SpawnLetterTimerHandle);
 	bSelectNewWord = false;
 	HandleGameResume();
 }
@@ -252,4 +231,28 @@ bool ABullCowGameMachineGameMode::GetGameIsPaused() const
 bool ABullCowGameMachineGameMode::GetGuessIsCorrect() const
 {
 	return bGuessIsCorrect;
+}
+
+void ABullCowGameMachineGameMode::SetPlayerGrabAndInteract(bool Value)
+{
+	PlayerRef->SetCanInteract(Value);
+	PlayerRef->SetCanGrab(Value);
+}
+
+void ABullCowGameMachineGameMode::ClearTimer(FTimerHandle TimerToClear)
+{
+	GetWorld()->GetTimerManager().ClearTimer(TimeRemainingTimerHandle);
+}
+
+TArray<FString> ABullCowGameMachineGameMode::GetWordsWithLength(int32 Length)
+{
+	TArray<FString> WordsWithRightLength;
+	for (FString Word : WordList)
+	{
+		if (Word.Len() == Length)
+		{
+			WordsWithRightLength.Emplace(Word);
+		}
+	}
+	return WordsWithRightLength;
 }
