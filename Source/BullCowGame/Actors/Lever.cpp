@@ -6,6 +6,7 @@
 #include "BullCowGame/GameModes/BullCowGameMachineGameMode.h"
 #include "BullCowGameMachine.h"
 #include "Misc/Char.h"
+#include "Kismet/GameplayStatics.h"
 
 ALever::ALever()
 {
@@ -30,6 +31,7 @@ void ALever::Interact()
 {
 	if (!MachineRef) return;
 	if (bIsMoving) return;
+	if (LeverSound)UGameplayStatics::PlaySoundAtLocation(this, LeverSound, GetActorLocation());
 	GameModeRef->LeverActivation(MachineRef);
 	bIsMoving = true;
 }
@@ -43,7 +45,11 @@ void ALever::Tick(float DeltaTime)
 	float PitchDirection = (bReverse) ? -LeverRotationSpeed : LeverRotationSpeed;
 	Lever->AddLocalRotation(FRotator(PitchDirection * DeltaTime, 0.f, 0.f));
 
-	if (Lever->GetComponentRotation().Pitch > EndRotation.Pitch) bReverse = true;
+	if (Lever->GetComponentRotation().Pitch > EndRotation.Pitch)
+	{
+		if(LeverSound)UGameplayStatics::PlaySoundAtLocation(this, LeverSound, GetActorLocation());
+		bReverse = true;
+	}
 	if (Lever->GetComponentRotation().Pitch < StartRotation.Pitch)
 	{
 		bReverse = false;

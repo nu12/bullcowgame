@@ -6,6 +6,8 @@
 #include "Components/PointLightComponent.h"
 #include "Engine/TriggerVolume.h"
 #include "Letter.h"
+#include "Particles/ParticleSystemComponent.h"
+#include "Kismet/GameplayStatics.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -69,6 +71,8 @@ void ABullCowGameMachine::SpawnLetter(TCHAR chr)
 {
 	if (!LetterClass) return;
 	ALetter* SpawnedLetter = GetWorld()->SpawnActor<ALetter>(LetterClass, LetterSpawnPoint->GetComponentTransform());
+	if(SpawnParticle) UGameplayStatics::SpawnEmitterAtLocation(this, SpawnParticle, LetterSpawnPoint->GetComponentLocation());
+	if(SpawnSound) UGameplayStatics::PlaySoundAtLocation(this, SpawnSound, LetterSpawnPoint->GetComponentLocation());
 	SpawnedLetter->SetStaticMesh((int32)(chr)-65);
 	SpawnedLetter->SetLetterValue(chr);
 	SpawnedLetter->Launch();

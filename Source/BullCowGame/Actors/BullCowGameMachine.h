@@ -9,6 +9,7 @@
 class ATriggerVolume;
 class APointLight;
 class ALetter;
+class UParticleSystem;
 
 UCLASS()
 class BULLCOWGAME_API ABullCowGameMachine : public AActor
@@ -55,4 +56,11 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		TSubclassOf<ALetter> LetterClass;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		UParticleSystem* SpawnParticle = nullptr;
+
+	UPROPERTY(EditAnywhere, Category = "Setup")
+	USoundBase* SpawnSound = nullptr;
+	
 };

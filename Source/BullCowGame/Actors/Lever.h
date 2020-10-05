@@ -45,6 +45,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		float LeverRotationSpeed = 80.f;
 
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		USoundBase* LeverSound = nullptr;
+
 	ABullCowGameMachineGameMode* GameModeRef = nullptr;
 
 	bool bReverse = false;
