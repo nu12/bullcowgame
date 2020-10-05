@@ -47,24 +47,18 @@ void ABullCowGameMachineGameMode::HandleGameOver(bool PlayerWon)
 
 void ABullCowGameMachineGameMode::HandleGameResume()
 {
-	if (bSelectNewWord)
-	{
-		SelectNewWord();
-		return;
-	}
+	if (bSelectNewWord) return SelectNewWord();		
 
 	// Set Lights
-	for (int32 i = 0; i < HiddenWord.Len(); i++)
-	{
-		MachineRef->GetLightAt(i)->PointLightComponent->SetIntensity(100.f);
-	}
-
-	UE_LOG(LogTemp, Warning, TEXT("Game is resumed"));
+	for (int32 i = 0; i < HiddenWord.Len(); i++) TurnLightOnAt(i);
+	
+	// Resume game
 	GetWorld()->GetTimerManager().SetTimer(TimeRemainingTimerHandle, this, &ABullCowGameMachineGameMode::TimeTick, 1.f, true);
 	SetPlayerGrabAndInteract(true);
 	bGameIsPaused = false;
 	GameResume();
 }
+
 
 void ABullCowGameMachineGameMode::SelectNewWord()
 {
@@ -83,11 +77,7 @@ void ABullCowGameMachineGameMode::HandleGamePause()
 
 	bGuessIsCorrect = CheckGuess();
 
-	if (bGuessIsCorrect && CurrentLevel == MaxLevel)
-	{
-		HandleGameOver(true);
-		return;
-	}
+	if (bGuessIsCorrect && CurrentLevel == MaxLevel) return HandleGameOver(true);
 
 	if (bGuessIsCorrect)
 	{
@@ -127,22 +117,27 @@ void ABullCowGameMachineGameMode::SpawnNextLetter()
 	HandleGameResume();
 }
 
-bool ABullCowGameMachineGameMode::CheckGuess() const
+void ABullCowGameMachineGameMode::SetLightColorAt(int32 Index, FLinearColor Color)
 {
+	MachineRef->GetLightAt(Index)->GetLightComponent()->SetLightColor(Color);
+}
 
+bool ABullCowGameMachineGameMode::CheckGuess()
+{
 	bool bIsGuessCorrect = true;
+
+	FLinearColor Color = FLinearColor::Red;
 
 	for (int32 i = 0; i < HiddenWord.Len(); i++)
 	{
-		ATriggerVolume* Trigger = MachineRef->GetTriggerAt(i);
 		TArray<AActor*> ActorsInTrigger;
-		Trigger->GetOverlappingActors(ActorsInTrigger, ALetter::StaticClass());
+		MachineRef->GetTriggerAt(i)->GetOverlappingActors(ActorsInTrigger, ALetter::StaticClass());
 
 		if (ActorsInTrigger.Num() == 0)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pos %d: No actor in the trigger"), i);
 			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			SetLightColorAt(i, FLinearColor::Red);
 			continue;
 		}
 
@@ -150,7 +145,7 @@ bool ABullCowGameMachineGameMode::CheckGuess() const
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pos %d: More than 1 actor in the trigger"), i);
 			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			SetLightColorAt(i, FLinearColor::Red);
 			continue;
 		}
 
@@ -160,7 +155,7 @@ bool ABullCowGameMachineGameMode::CheckGuess() const
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Cast failed"), i);
 			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Red);
+			SetLightColorAt(i, FLinearColor::Red);
 			continue;
 		}
 
@@ -169,14 +164,14 @@ bool ABullCowGameMachineGameMode::CheckGuess() const
 			FLinearColor LightColor = (HiddenWord.GetCharArray().Contains(Letter->GetLetterValue())) ? FLinearColor::Yellow : FLinearColor::Red;
 			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter incorrect %c x %c"), i, Letter->GetLetterValue(), HiddenWord[i]);
 			bIsGuessCorrect = false;
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(LightColor);
+			SetLightColorAt(i, LightColor);
 			continue;
 		}
 
 		if (Letter->GetLetterValue() == HiddenWord[i])
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pos %d: Letter correct %c x %c"), i, Letter->GetLetterValue(), HiddenWord[i]);
-			MachineRef->GetLightAt(i)->GetLightComponent()->SetLightColor(FLinearColor::Green);
+			SetLightColorAt(i, FLinearColor::Green);
 			continue;
 		}
 
@@ -288,4 +283,9 @@ int32 ABullCowGameMachineGameMode::GetTimeToAddWhenGuessIsCorrect() const
 int32 ABullCowGameMachineGameMode::GetTimeToRemoveWhenGuessIsWrong() const
 {
 	return TimeToRemoveWhenGuessIsWrong;
+}
+
+void ABullCowGameMachineGameMode::TurnLightOnAt(const int32& i)
+{
+	MachineRef->GetLightAt(i)->PointLightComponent->SetIntensity(LightIntensity);
 }

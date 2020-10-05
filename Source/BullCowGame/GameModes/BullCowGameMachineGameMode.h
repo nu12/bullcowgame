@@ -23,14 +23,6 @@ public:
 
 	void HandleGameResume() override;
 
-	TArray<FString> GetWordsWithLength(int32 Length);
-
-	bool IsIsogram(const FString& Input) const;
-
-	void SelectNewWord();
-
-	void AddRandomCharactersTo(TArray<TCHAR>& InArray, int32 NumberOfCharsToAdd);
-
 	UFUNCTION(BlueprintCallable)
 	FString GetHiddenWord() const;
 
@@ -52,53 +44,62 @@ public:
 	UFUNCTION(BlueprintCallable)
 		int32 GetTimeToRemoveWhenGuessIsWrong() const;
 
-	void SetPlayerGrabAndInteract(bool Value);
-
-	void ClearTimer(FTimerHandle TimerToClear);
-
+	
 protected:
 	void BeginPlay() override;
 
-	TArray<TCHAR> GetCharArrayWithoutNullCharacter(FString StringRef);
-
-	void LoadWordListFromFile();
-
+	
+/*=================== GAMEPLAY VARIABLES ===================*/
 private:
+	ABullCowGameMachine* MachineRef = nullptr;
+	ABullCowCharacter* PlayerRef = nullptr;
+	FTimerHandle SpawnLetterTimerHandle;
+	FTimerHandle TimeRemainingTimerHandle;
 	bool bGameHasStarted = false;
 	bool bGameIsOver = false;
 	bool bGameIsPaused = true;
 	bool bSelectNewWord = true;
 	bool bGuessIsCorrect = true;
-
 	TArray<TCHAR> CharactersToSpawn;
-
 	TArray<TCHAR> CharactersPool;
-
 	TArray<TCHAR> SpawnedCharacters;
-
 	TArray<FString> WordList;
-
 	FString HiddenWord;
-
 	int32 CurrentLevel = 0;
-
 	int32 TimeRemaining = 0;
+
+/*=================== HELPER FUNCTIONS ===================*/
+private:
+	void LoadWordListFromFile();
+	
+	void SelectNewWord();
 
 	void SpawnNextLetter();
 
-	bool CheckGuess() const;
+	void SetLightColorAt(int32 Index,  FLinearColor Color);
 
-	ABullCowGameMachine* MachineRef = nullptr;
-	ABullCowCharacter* PlayerRef = nullptr;
+	void TurnLightOnAt(const int32& i);
 
-	FTimerHandle SpawnLetterTimerHandle;
+	bool CheckGuess();
 
-	FTimerHandle TimeRemainingTimerHandle;
+	void SetPlayerGrabAndInteract(bool Value);
 
+	void ClearTimer(FTimerHandle TimerToClear);
+
+	void AddRandomCharactersTo(TArray<TCHAR>& InArray, int32 NumberOfCharsToAdd);
+	
 	void TimeTick();
 
 	void CheckTimeIsOver(float Seconds);
 
+	bool IsIsogram(const FString& Input) const;
+	
+	TArray<FString> GetWordsWithLength(int32 Length);
+
+	TArray<TCHAR> GetCharArrayWithoutNullCharacter(FString StringRef);
+
+/*=================== PROPERTIES ===================*/
+private: 
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 InitialTime = 120;
 
@@ -117,9 +118,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		float LetterSpawnDelay = 1.f;
 
+	UPROPERTY(EditAnywhere, Category = "Setup")
+		float LightIntensity = 100.f;
+
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
 		int32 RandomCharactersPerTurn = 2;
 
+
+/*=================== TEMPLATE FUNCTIONS ===================*/
+private: 
 	template <class T>
 	T SelectRandomElementFromArray(TArray<T> InArray)
 	{
