@@ -240,7 +240,7 @@ void ABullCowGameMachineGameMode::LoadWordListFromFile()
 
 	// Keep only isograms
 	for (FString Word : TempArray)
-		if (IsIsogram(Word)) WordList.Emplace(Word.ToUpper());
+		if (IsIsogram(Word.ToUpper())) WordList.Emplace(Word);
 }
 
 bool ABullCowGameMachineGameMode::IsIsogram(const FString& Input) const {
