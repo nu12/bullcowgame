@@ -14,12 +14,8 @@ ACow::ACow()
 
 	RootCapsule = CreateDefaultSubobject<UBoxComponent>(TEXT("Capsule"));
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Static Mesh"));
-	Billboard = CreateDefaultSubobject<UBillboardComponent>(TEXT("Billboard"));
-	ActionWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("Widget"));
 	RootComponent = RootCapsule;
 	StaticMesh->SetupAttachment(RootComponent);
-	Billboard->SetupAttachment(RootComponent);
-	ActionWidget->SetupAttachment(Billboard);
 }
 
 // Called when the game starts or when spawned

@@ -31,10 +31,6 @@ private:
 		UBoxComponent* RootCapsule;
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* StaticMesh;
-	UPROPERTY(VisibleAnywhere)
-		UBillboardComponent* Billboard;
-	UPROPERTY(VisibleAnywhere)
-		UWidgetComponent* ActionWidget;
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		bool bCanMove = false;
@@ -47,9 +43,6 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Setup")
 		float MaxTimeToMove = 4.f;
-
-	UPROPERTY(EditAnywhere, Category = "Setup")
-		FString TextToDisplay = TEXT("");
 
 	FTimerHandle Timer;
 };
